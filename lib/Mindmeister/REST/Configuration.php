@@ -60,7 +60,7 @@ class Mindmeister_REST_Configuration
 	 */
 	public function getEndpointUrl()
 	{
-		return self::$endpoints[$endpoint];
+		return self::$endpoints[$this->_endpoint];
 	}
 	
 	/**
