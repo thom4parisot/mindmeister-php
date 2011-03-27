@@ -8,6 +8,8 @@
 class Mindmeister_REST_Configuration
 {
 	private $_api_key;
+	private $_auth_token;
+	private $_frob;
 	private	$_secret;
 	private $_endpoint = 'https';
 	
@@ -43,6 +45,21 @@ class Mindmeister_REST_Configuration
 	}
 	
 	/**
+	 * Returns the authentication token
+	 * 
+	 * @return unknown_type
+	 */
+	public function getAuthToken()
+	{
+		if (!$this->_auth_token)
+		{
+			
+		}
+		
+		return $this->_auth_token;
+	}
+	
+	/**
 	 * Returns the current shared secret
 	 * 
 	 * @return String
@@ -50,6 +67,16 @@ class Mindmeister_REST_Configuration
 	public function getSecret()
 	{
 		return $this->_secret;
+	}
+	
+	/**
+	 * Returns the Endpoint pattern for further replacements
+	 * 
+	 * @return String
+	 */
+	public function getEndpointPattern()
+	{
+		return self::ENDPOINT_PATTERN;
 	}
 	
 	/**
