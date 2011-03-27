@@ -55,7 +55,6 @@ class Mindmeister_REST_Response
 	/**
 	 * Returns the response values, if any
 	 * 
-	 * @todo handle auth feed
 	 * @return Array
 	 */
 	public function getContent()
