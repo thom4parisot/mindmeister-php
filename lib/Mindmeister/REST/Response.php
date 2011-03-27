@@ -64,8 +64,15 @@ class Mindmeister_REST_Response
 		{
 			return array();
 		}
-		
-		return (array)$this->_response->children();
+
+		if (isset($this->_response->auth))
+		{
+			return (array)$this->_response->auth->children();
+		}
+		else
+		{
+			return (array)$this->_response->children();
+		}
 	}
 	
 	/**
@@ -85,13 +92,8 @@ class Mindmeister_REST_Response
 	 */
 	public function getValue($key)
 	{
-		static $content;
-		
-		if (null === $content)
-		{
-			$content = $this->getContent();
-		}
-		
+		$content = $this->getContent();
+
 		return isset($content[$key]) ? $content[$key] : null;
 	}
 	
@@ -124,5 +126,13 @@ class Mindmeister_REST_Response
 	public function __toString()
 	{
 		return $this->getRawResponse();
+	}
+	
+	/**
+	 * Destructs the object
+	 */
+	public function __destruct()
+	{
+		unset($this->_request);
 	}
 }
