@@ -16,11 +16,9 @@ class Mindmeister_REST_Configuration
 	protected static $endpoints = array(
 		'http' 	=> 'http://www.mindmeister.com/services/rest/',
 		'https' => 'https://www.mindmeister.com/services/rest/',
+		'auth' 	=> 'http://www.mindmeister.com/services/auth/',
 	);
-	
-	const ENDPOINT_PATTERN = '%endpoint%?method=%method%&api_key=%api_key%%parameters%%api_sig%';
-	const ENDPOINT_SIG_PARAMETER = '&api_sig=%s';
-	
+
 	/**
 	 * Builds a new Mindmeister REST configuration
 	 * 
@@ -32,6 +30,7 @@ class Mindmeister_REST_Configuration
 	{
 		$this->_api_key = $api_key;
 		$this->_secret =	$secret;
+		$this->_auth_token = $this->getAuthToken();
 	}
 	
 	/**
@@ -47,16 +46,41 @@ class Mindmeister_REST_Configuration
 	/**
 	 * Returns the authentication token
 	 * 
-	 * @return unknown_type
+	 * @return String|null
 	 */
 	public function getAuthToken()
 	{
-		if (!$this->_auth_token)
+		if (!$this->isAuthenticated())
 		{
-			
+			$auth_token = $this->readAuthToken();
+		}
+		else
+		{
+			$auth_token = $this->_auth_token;
 		}
 		
-		return $this->_auth_token;
+		return $auth_token;
+	}
+	
+	/**
+	 * Retrieves an auth token URl for a given frob
+	 * 
+	 * @param String $frob
+	 * @return String
+	 */
+	public function getAuthTokenUrl($frob, $perms = 'read')
+	{
+		$parameters = array(
+			'api_key' => $this->_api_key,
+			'perms' => $perms,
+			'frob' => $frob,
+		);
+
+		return sprintf('%s?%s&api_sig=%s',
+			$this->getEndpointUrl('auth'),
+			http_build_query($parameters),
+			Mindmeister_REST_Request::signParameters($this, $parameters)
+		);
 	}
 	
 	/**
@@ -85,9 +109,55 @@ class Mindmeister_REST_Configuration
 	 * @param $endpoint	String Endpoint ID
 	 * @return String Endpoint URL
 	 */
-	public function getEndpointUrl()
+	public function getEndpointUrl($endpoint = null)
 	{
-		return self::$endpoints[$this->_endpoint];
+		return self::$endpoints[null === $endpoint ? $this->_endpoint : $endpoint];
+	}
+	
+	/**
+	 * Returns if the system is authenticated for the current API key
+	 * 
+	 * @return Boolean
+	 */
+	public function isAuthenticated()
+	{
+		return null === $this->_auth_token ? false : true;
+	}
+	
+	/**
+	 * Reads a token from memory
+	 * 
+	 * @todo make directory configurable
+	 * @todo abstract to read the token from other backend (memcache, apc etc.)
+	 * @return String
+	 */
+	private function readAuthToken()
+	{
+		$auth_token = null;
+		$file = sprintf('%s/%s', sys_get_temp_dir(), md5($this->_api_key.$this->_secret));
+
+		if (file_exists($file))
+		{
+			$auth_token = trim(file_get_contents($file));
+		}
+
+		return $auth_token;
+	}
+	
+	private function writeAuthToken($token)
+	{
+		$file = sprintf('%s/%s', sys_get_temp_dir(), md5($this->_api_key.$this->_secret));
+		file_put_contents($file, $token);
+	}
+	
+	public function setAuthToken($token, $persist = false)
+	{
+		$this->_auth_token = $token;
+		
+		if (true === $persist)
+		{
+			$this->writeAuthToken($token);
+		}
 	}
 	
 	/**
