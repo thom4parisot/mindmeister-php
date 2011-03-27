@@ -2,6 +2,7 @@
 /**
  * REST response from a request
  * 
+ * @todo	Implements ArrayAccess
  * @author oncletom
  */
 class Mindmeister_REST_Response
@@ -46,23 +47,25 @@ class Mindmeister_REST_Response
 	private function dispatch()
 	{
 		$this->_response = new SimpleXMLElement($this->_raw_response);
-		$this->_status = $this->_response['@attributes']['stat'];
+		$attributes = (array)$this->_response->attributes();
+
+		$this->_status = $attributes['@attributes']['stat'];
 	}
 	
 	/**
 	 * Returns the response values, if any
 	 * 
 	 * @todo handle auth feed
-	 * @return SimpleXMLElement|null (if error)
+	 * @return Array
 	 */
 	public function getContent()
 	{
-		if (!$this->isFailure())
+		if ($this->isFailure())
 		{
-			return null;
+			return array();
 		}
 		
-		return $this->_response->children();
+		return (array)$this->_response->children();
 	}
 	
 	/**
