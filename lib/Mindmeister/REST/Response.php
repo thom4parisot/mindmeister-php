@@ -78,6 +78,24 @@ class Mindmeister_REST_Response
 	}
 	
 	/**
+	 * Returns the content value for a given key
+	 * 
+	 * @param String $key
+	 * @return Mixed
+	 */
+	public function getValue($key)
+	{
+		static $content;
+		
+		if (null === $content)
+		{
+			$content = $this->getContent();
+		}
+		
+		return isset($content[$key]) ? $content[$key] : null;
+	}
+	
+	/**
 	 * Returns true if the request was a failure
 	 * 
 	 * @return Boolean
