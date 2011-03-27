@@ -87,7 +87,7 @@ class Mindmeister_REST_Response
 	 * Returns the content value for a given key
 	 * 
 	 * @param String $key
-	 * @return Mixed
+	 * @return SimpleXMLElement|null
 	 */
 	public function getValue($key)
 	{
