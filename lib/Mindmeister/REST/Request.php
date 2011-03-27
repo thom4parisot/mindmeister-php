@@ -134,7 +134,7 @@ class Mindmeister_REST_Request
 	 */
 	private function setMethod($method)
 	{
-		$class = 'Mindmeister_REST_'.ucfirst(preg_replace('/^(mm\.)?([^\.]+)\.(.+)$/sU', '\\2_\\3', $method));
+		$class = 'Mindmeister_REST_'.ucfirst(preg_replace('/^(mm\.|)([^\.]+)\.(.+)$/sU', '\\2_\\3', $method));
 		$this->_method = new $class;
 	}
 	
