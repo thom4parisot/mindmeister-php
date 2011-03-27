@@ -47,9 +47,9 @@ class Mindmeister_REST_Response
 	private function dispatch()
 	{
 		$this->_response = new SimpleXMLElement($this->_raw_response);
-		$attributes = (array)$this->_response->attributes();
+		$attributes = $this->_response->attributes();
 
-		$this->_status = $attributes['@attributes']['stat'];
+		$this->_status = $attributes->stat;
 	}
 	
 	/**
@@ -66,11 +66,11 @@ class Mindmeister_REST_Response
 
 		if (isset($this->_response->auth))
 		{
-			return (array)$this->_response->auth->children();
+			return $this->_response->auth->children();
 		}
 		else
 		{
-			return (array)$this->_response->children();
+			return $this->_response->children();
 		}
 	}
 	
@@ -93,7 +93,7 @@ class Mindmeister_REST_Response
 	{
 		$content = $this->getContent();
 
-		return isset($content[$key]) ? $content[$key] : null;
+		return isset($content->$key) ? $content->$key : null;
 	}
 	
 	/**
