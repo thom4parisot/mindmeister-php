@@ -18,9 +18,9 @@ class Mindmeister_REST_Request
 	private $_method;
 	
 	/**
-	 * @var Mindmeister_REST_Response
+	 * @var String
 	 */
-	private $_response;
+	private $_request_url;
 
 	/**
 	 * Constructs a new API Request
@@ -48,7 +48,7 @@ class Mindmeister_REST_Request
 			$this->_configuration->getEndpointUrl(),
 			http_build_query($this->getParameters())
 		);
-		
+
 		if ($this->_method->requiresSigning())
 		{
 			$url .= sprintf('&api_sig=%s', $this->getApiSignature());
@@ -56,7 +56,7 @@ class Mindmeister_REST_Request
 		
 		$this->_request_url = $url;
 		$raw_response = $this->processRequest($url);
-		$this->_response = new Mindmeister_REST_Response($this, $raw_response);
+		return new Mindmeister_REST_Response($this, $raw_response);
 	}
 	
 	/**
@@ -184,14 +184,6 @@ class Mindmeister_REST_Request
 	}
 	
 	/*
-	 * RESPONSE
-	 */
-	function getResponse()
-	{
-		return $this->_response;
-	}
-	
-	/*
 	 * PHP INTERNALS
 	 */
 
@@ -202,6 +194,5 @@ class Mindmeister_REST_Request
 	{
 		unset($this->_method);
 		unset($this->_configuration);
-		unset($this->_response);
 	}
 }
