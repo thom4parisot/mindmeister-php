@@ -66,9 +66,20 @@ class Mindmeister_REST_Request
 	 */
 	public function getApiSignature()
 	{
-		$parameters = $this->getParameters();
+		return self::signParameters($this->_configuration, $this->getParameters());
+	}
+	
+	/**
+	 * Sign parameters for a given configuration
+	 * 
+	 * @param Mindmeister_REST_Configuration $configuration
+	 * @param Array $parameters
+	 * @return String
+	 */
+	public static function signParameters(Mindmeister_REST_Configuration $configuration, array $parameters)
+	{
 		ksort($parameters);
-		$query = $this->_configuration->getSecret();
+		$query = $configuration->getSecret();
 
 		if (!empty($parameters))
 		{
@@ -105,14 +116,23 @@ class Mindmeister_REST_Request
 	/*
 	 * METHOD
 	 */
+	/**
+	 * Returns the API method object
+	 * 
+	 * @return Mindmeister_REST_RequestBase
+	 */
+	public function getMethod()
+	{
+		return $this->_method;
+	}
 	
 	/**
 	 * Defines the Request method call
 	 * 
+	 * @private
 	 * @param $method
-	 * @return unknown_type
 	 */
-	protected function setMethod($method)
+	private function setMethod($method)
 	{
 		$class = 'Mindmeister_REST_'.ucfirst(preg_replace('/^(mm\.)?([^\.]+)\.(.+)$/sU', '\\2_\\3', $method));
 		$this->_method = new $class;
