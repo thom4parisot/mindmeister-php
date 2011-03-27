@@ -76,6 +76,7 @@ class Mindmeister_REST_Response
 	
 	/**
 	 * Returns the raw response of the request
+	 * 
 	 * @return String
 	 */
 	public function getRawResponse()
