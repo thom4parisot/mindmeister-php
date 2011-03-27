@@ -7,16 +7,20 @@
  */
 class Mindmeister_REST_Request
 {
+	/**
+	 * @var Mindmeister_REST_Configuration
+	 */
 	private $_configuration;
-	
-	protected static $default_parameters = array(
-		'%endpoint%' => 	'',
-		'%method%' =>			'',
-		'%parameters%' =>	'',
-		'%api_sig%' =>		'',
-	);
 
+	/**
+	 * @var Mindmeister_REST_RequestBase
+	 */
 	private $_method;
+	
+	/**
+	 * @var Mindmeister_REST_Response
+	 */
+	private $_response;
 
 	/**
 	 * Constructs a new API Request
@@ -32,16 +36,40 @@ class Mindmeister_REST_Request
 	}
 	
 	/**
+	 * Executes the request
+	 * 
+	 * @todo	abstract the remote call
+	 * @todo handling authentication
+	 * @return Mindmeister_REST_Response
+	 */
+	public function dispatch()
+	{
+		$url = sprintf('%s?%s',
+			$this->_configuration->getEndpointUrl(),
+			http_build_query($this->getParameters())
+		);
+		
+		if ($this->_method->requiresSigning())
+		{
+			$url .= sprintf('&api_sig=%s', $this->getApiSignature());
+		}
+		
+		$this->_request_url = $url;
+		$raw_response = $this->processRequest($url);
+		$this->_response = new Mindmeister_REST_Response($this, $raw_response);
+	}
+	
+	/**
 	 * Retrieves the API signature for the current method request
 	 * 
 	 * @return string	MD5 hash
 	 */
 	public function getApiSignature()
 	{
-		$parameters = $this->_method->getParameters();
+		$parameters = $this->getParameters();
 		ksort($parameters);
 		$query = $this->_configuration->getSecret();
-		
+
 		if (!empty($parameters))
 		{
 			foreach ($parameters as $key => $value)
@@ -54,6 +82,31 @@ class Mindmeister_REST_Request
 	}
 	
 	/**
+	 * Process the request and gives back the result
+	 * 
+	 * @todo check if curl_init is available
+	 * @param $url
+	 * @return String XML Response
+	 */
+	private function processRequest($url)
+	{
+		$curl = curl_init($url);
+		curl_setopt_array($curl, array(
+			CURLOPT_HEADER => false,
+			CURLOPT_HTTPGET => true,
+			CURLOPT_RETURNTRANSFER => true,
+		));
+		$response = curl_exec($curl);
+		curl_close($curl);
+		
+		return $response;
+	}
+	
+	/*
+	 * METHOD
+	 */
+	
+	/**
 	 * Defines the Request method call
 	 * 
 	 * @param $method
@@ -63,6 +116,51 @@ class Mindmeister_REST_Request
 	{
 		$class = 'Mindmeister_REST_'.ucfirst(preg_replace('/^(mm\.)?([^\.]+)\.(.+)$/sU', '\\2_\\3', $method));
 		$this->_method = new $class;
+	}
+	
+	/*
+	 * PARAMETERS
+	 */
+	
+	/**
+	 * Retrieves all request parameters, including the method ones
+	 * 
+	 * @return Array
+	 */
+	public function getParameters()
+	{
+		$parameters = array(
+			'api_key' =>	$this->_configuration->getApiKey(),
+			'method' =>		$this->_method->getMethod(),
+		);
+		
+		/*
+		 * Appending method parameters
+		 */
+		$p = $this->_method->getParameters();
+		if (!empty($p))
+		{
+			$parameters += $p;
+		}
+		
+		/*
+		 * Checking access
+		 */
+		$access = $this->_method->getAccess();
+		if ($access)
+		{
+			$parameters['access'] = $access;
+		}
+		
+		/*
+		 * Adding auth key
+		 */
+		if ($this->_method->requiresAuthentication())
+		{
+			$parameters['auth_token'] = $this->_configuration->getAuthToken();
+		}
+		
+		return $parameters;
 	}
 	
 	/**
@@ -83,5 +181,27 @@ class Mindmeister_REST_Request
 	public function setParameters(array $parameters)
 	{
 		$this->_method->setParameters($parameters);
+	}
+	
+	/*
+	 * RESPONSE
+	 */
+	function getResponse()
+	{
+		return $this->_response;
+	}
+	
+	/*
+	 * PHP INTERNALS
+	 */
+
+	/**
+	 * Deconstructs the request
+	 */
+	public function __destruct()
+	{
+		unset($this->_method);
+		unset($this->_configuration);
+		unset($this->_response);
 	}
 }

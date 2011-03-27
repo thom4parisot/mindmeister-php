@@ -1,5 +1,10 @@
 <?php
-
+/**
+ * Base methods for any REST Request, to handle parameters
+ * 
+ * @abstract
+ * @author oncletom
+ */
 abstract class Mindmeister_REST_RequestBase
 {
 	private $_parameters = array();
@@ -10,6 +15,8 @@ abstract class Mindmeister_REST_RequestBase
 	 * @return unknown_type
 	 */
 	abstract public function initParametersMap();
+	
+	abstract public function getMethod();
 	
 	/**
 	 * 
@@ -27,6 +34,36 @@ abstract class Mindmeister_REST_RequestBase
 	public function __construct()
 	{
 		$this->initParametersMap();
+	}
+	
+	/**
+	 * Returns if the request needs a special access
+	 * 
+	 * @return String
+	 */
+	public function getAccess()
+	{
+		return (string)constant(sprintf('%s::REQUIRES_ACCESS', get_class($this)));
+	}
+	
+	/**
+	 * Returns if the request needs authentication
+	 * 
+	 * @return Boolean
+	 */
+	public function requiresAuthentication()
+	{
+		return (bool)constant(sprintf('%s::REQUIRES_AUTHENTICATION', get_class($this)));
+	}
+	
+	/**
+	 * Returns if the request needs a signing
+	 * 
+	 * @return Boolean
+	 */
+	public function requiresSigning()
+	{
+		return (bool)constant(sprintf('%s::REQUIRES_SIGNING', get_class($this)));
 	}
 	
 	/**
