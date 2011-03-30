@@ -12,8 +12,9 @@ class Mindmeister_REST_Configuration
 	private	$_secret;
 	private $_endpoint = 'https';
 	
+	private $_storage_class = 'Mindmeister_Storage_TmpFile';
 	private $_transport_class = 'Mindmeister_Transport_Curl';
-	
+
 	protected static $endpoints = array(
 		'http' 	=> 'http://www.mindmeister.com/services/rest/',
 		'https' => 'https://www.mindmeister.com/services/rest/',
@@ -37,6 +38,27 @@ class Mindmeister_REST_Configuration
 	/*
 	 * Handler
 	 */
+	/**
+	 * Returns the storage class name
+	 * 
+	 * @return String
+	 */
+	public function getStorageClass()
+	{
+		return $this->_storage_class;
+	}
+	
+	/**
+	 * Sets the transport class
+	 * 
+	 * @param Mindmeister_Transport_Interface $transport
+	 */
+	public function setStorageClass(Mindmeister_Storage_Interface $storage)
+	{
+		$this->_storage_class = get_class($storage);
+		unset($storage);
+	}
+
 	/**
 	 * Returns the transport class name
 	 * 
@@ -80,7 +102,9 @@ class Mindmeister_REST_Configuration
 	{
 		if (!$this->isAuthenticated())
 		{
-			$this->_auth_token = $this->readAuthToken();
+			$storage = new $this->_storage_class($this);
+			
+			$this->_auth_token = $storage->getAuthToken();
 		}
 		
 		return $this->_auth_token;
@@ -147,33 +171,7 @@ class Mindmeister_REST_Configuration
 	{
 		return null === $this->_auth_token ? false : true;
 	}
-	
-	/**
-	 * Reads a token from memory
-	 * 
-	 * @todo make directory configurable
-	 * @todo abstract to read the token from other backend (memcache, apc etc.)
-	 * @return String
-	 */
-	private function readAuthToken()
-	{
-		$auth_token = null;
-		$file = sprintf('%s/%s', sys_get_temp_dir(), md5($this->_api_key.$this->_secret));
 
-		if (file_exists($file))
-		{
-			$auth_token = trim(file_get_contents($file));
-		}
-
-		return $auth_token;
-	}
-	
-	private function writeAuthToken($token)
-	{
-		$file = sprintf('%s/%s', sys_get_temp_dir(), md5($this->_api_key.$this->_secret));
-		file_put_contents($file, $token);
-	}
-	
 	/**
 	 * Defines the app auth token
 	 * 
@@ -186,7 +184,8 @@ class Mindmeister_REST_Configuration
 		
 		if (true === $persist)
 		{
-			$this->writeAuthToken($this->_auth_token);
+			$storage = new $this->_storage_class($this);
+			$storage->setAuthToken($this->_auth_token);
 		}
 	}
 	
