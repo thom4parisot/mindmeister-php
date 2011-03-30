@@ -13,6 +13,8 @@ class Mindmeister_REST_Configuration
 	private	$_secret;
 	private $_endpoint = 'https';
 	
+	private $_transport_class = 'Mindmeister_Transport_Curl';
+	
 	protected static $endpoints = array(
 		'http' 	=> 'http://www.mindmeister.com/services/rest/',
 		'https' => 'https://www.mindmeister.com/services/rest/',
@@ -32,7 +34,34 @@ class Mindmeister_REST_Configuration
 		$this->_secret =	$secret;
 		$this->_auth_token = $this->getAuthToken();
 	}
+
+	/*
+	 * Handler
+	 */
+	/**
+	 * Returns the transport class name
+	 * 
+	 * @return String
+	 */
+	public function getTransportClass()
+	{
+		return $this->_transport_class;
+	}
 	
+	/**
+	 * Sets the transport class
+	 * 
+	 * @param Mindmeister_Transport_Interface $transport
+	 */
+	public function setTransportClass(Mindmeister_Transport_Interface $transport)
+	{
+		$this->_transport_class = get_class($transport);
+		unset($transport);
+	}
+	
+	/*
+	 * Security related stuff
+	 */
 	/**
 	 * Returns the current API key
 	 * 
@@ -42,7 +71,7 @@ class Mindmeister_REST_Configuration
 	{
 		return $this->_api_key;	
 	}
-	
+
 	/**
 	 * Returns the authentication token
 	 * 

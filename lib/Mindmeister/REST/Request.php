@@ -95,22 +95,15 @@ class Mindmeister_REST_Request
 	/**
 	 * Process the request and gives back the result
 	 * 
-	 * @todo check if curl_init is available
 	 * @param $url
 	 * @return String XML Response
 	 */
 	private function processRequest($url)
 	{
-		$curl = curl_init($url);
-		curl_setopt_array($curl, array(
-			CURLOPT_HEADER => false,
-			CURLOPT_HTTPGET => true,
-			CURLOPT_RETURNTRANSFER => true,
-		));
-		$response = curl_exec($curl);
-		curl_close($curl);
-		
-		return $response;
+		$transport_class = $this->_configuration->getTransportClass();
+		$transport = new $transport_class();
+
+		return $transport->getUrlContent($url);
 	}
 	
 	/*
