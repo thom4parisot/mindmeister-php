@@ -115,7 +115,6 @@ Expected parameters and results can be found in [Mindmeister API documentation](
 
 * Provide an API for response, to avoid cycling through SimpleXMLElements
 * Provide an Auth Token storage backend
-* Abstract Auth Token handling from Configuration (should not be used for that)
 * Provide a validation mechanism _before_ dispatching a request
 * Implementing Exceptions
 * Handling error codes (and mix them with Exceptions mechanism)
