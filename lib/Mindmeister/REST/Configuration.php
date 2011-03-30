@@ -73,7 +73,7 @@ class Mindmeister_REST_Configuration
 		$parameters = array(
 			'api_key' => $this->_api_key,
 			'perms' => $perms,
-			'frob' => $frob,
+			'frob' => (string)$frob,
 		);
 
 		return sprintf('%s?%s&api_sig=%s',
