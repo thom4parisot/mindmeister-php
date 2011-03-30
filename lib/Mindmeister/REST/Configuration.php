@@ -174,13 +174,19 @@ class Mindmeister_REST_Configuration
 		file_put_contents($file, $token);
 	}
 	
+	/**
+	 * Defines the app auth token
+	 * 
+	 * @param String $token
+	 * @param Boolean $persist
+	 */
 	public function setAuthToken($token, $persist = false)
 	{
-		$this->_auth_token = $token;
+		$this->_auth_token = (string)$token;
 		
 		if (true === $persist)
 		{
-			$this->writeAuthToken($token);
+			$this->writeAuthToken($this->_auth_token);
 		}
 	}
 	
