@@ -80,14 +80,10 @@ class Mindmeister_REST_Configuration
 	{
 		if (!$this->isAuthenticated())
 		{
-			$auth_token = $this->readAuthToken();
-		}
-		else
-		{
-			$auth_token = $this->_auth_token;
+			$this->_auth_token = $this->readAuthToken();
 		}
 		
-		return $auth_token;
+		return $this->_auth_token;
 	}
 	
 	/**
