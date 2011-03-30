@@ -9,7 +9,6 @@ class Mindmeister_REST_Configuration
 {
 	private $_api_key;
 	private $_auth_token;
-	private $_frob;
 	private	$_secret;
 	private $_endpoint = 'https';
 	
